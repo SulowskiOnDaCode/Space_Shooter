@@ -15,7 +15,7 @@ public class MusicPlayer : MonoBehaviour
 {
     public static MusicPlayer Instance { get; private set; }
 
-    private const string SongPath = "Music/Escape_Your_Mind_ft_4banga_KLICKAUD";
+    private const string SongPath = "Music/AttackByStorm";
     private const float GameVolume = 0.4f;
     private const float MenuVolume = 0.12f;
     private const float FadeTime = 1.2f;

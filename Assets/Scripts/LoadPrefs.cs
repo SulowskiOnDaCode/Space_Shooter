@@ -25,21 +25,27 @@ public class LoadPrefs : MonoBehaviour
     {
         if (canUse)
         {
+            // Not assigned in the scene: find it (a fresh install has no saved volume and needs it).
+            if (menuController == null) menuController = FindAnyObjectByType<MenuController>();
+
             if(PlayerPrefs.HasKey("masterVolume"))
             {
-                videoPlayer = videoPlayerObject.GetComponent<VideoPlayer>();
-
+                // Saved as 0..1 (AudioListener volume); the slider and label use 0..100.
                 float localVolume = PlayerPrefs.GetFloat("masterVolume");
-                volumeTextValue.text = localVolume.ToString();
-                volumeSlider.value = localVolume;
+                volumeTextValue.text = Mathf.RoundToInt(localVolume * 100f).ToString();
+                volumeSlider.value = localVolume * 100f;
                 AudioListener.volume = localVolume;
-                videoPlayer.SetDirectAudioVolume(0, localVolume);
+
+                if (videoPlayerObject != null)
+                {
+                    videoPlayer = videoPlayerObject.GetComponent<VideoPlayer>();
+                    if (videoPlayer != null) videoPlayer.SetDirectAudioVolume(0, localVolume);
+                }
             }
-            else{
+            else if (menuController != null)
+            {
                 menuController.ResetButton("Audio");
             }
-
-            
         }
         
     }

@@ -96,7 +96,7 @@ public class MenuController : MonoBehaviour
     {
         if (MenuType == "Audio")
         {
-            AudioListener.volume = defaultVolume;
+            AudioListener.volume = defaultVolume / 100f; // slider is 0..100, the listener 0..1
             volumeSlider.value = defaultVolume;
             volumeTextValue.text = defaultVolume.ToString();
             VolumeApply();

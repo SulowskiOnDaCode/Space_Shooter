@@ -29,7 +29,7 @@ public static class BuildTools
 
         // Unity's debug-symbol folders are not meant to be shipped.
         foreach (var dir in Directory.GetDirectories(folder).Where(d =>
-                     d.EndsWith("_BurstDebugInformation_DoNotShip") || d.EndsWith("_BackUpThisFolder_ButDontShipItInYourProduct")))
+                     d.Contains("DoNotShip") || d.Contains("DontShip")))
             Directory.Delete(dir, true);
 
         Zip(folder, Path.Combine(BuildRoot, "SpaceShooter_Windows.zip"));

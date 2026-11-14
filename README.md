@@ -32,7 +32,7 @@ Man fliegt durch ein Asteroidenfeld, wehrt endlose, immer größere Gegnerwellen
 | Anforderung | Umsetzung |
 |---|---|
 | Hauptmenü / Pausemenü | Szene `MainMenu`; Esc-Menü mit Weiter, Hauptmenü, Beenden (`GameLogic`, `MenuExtras`) |
-| Audio | Soundeffekte über den `SoundManager` (Schüsse, Explosionen, Treffer, Fähigkeiten, Zeitstopp); Musik „Escape Your Mind“ (ft. 4banga) über den `MusicPlayer` – im Spiel und leise im Hauptmenü |
+| Audio | Soundeffekte über den `SoundManager` (Schüsse, Explosionen, Treffer, Fähigkeiten, Zeitstopp); Musik „Attack By Storm“ (Jujutsu Kaisen Season 2 OST) über den `MusicPlayer` – im Spiel und leise im Hauptmenü |
 | Eigene Shader | `Assets/Resources/VFX/*.shader` (Hintergrund, Schild-Fresnel, Explosionen, Pickups, Skybox) |
 | Physik | Trigger-Kollisionen für Treffer, `CharacterController` für den Spieler, Rigidbodies für Schüsse |
 | Schwierigkeit | `Spawner`: jede Welle mehr Schiffe (max. 11 gleichzeitig), später Kamikaze- und schwere Schiffe, dichteres Asteroidenfeld |

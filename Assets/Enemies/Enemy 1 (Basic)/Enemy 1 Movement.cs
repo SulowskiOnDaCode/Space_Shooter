@@ -1,101 +1,54 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Numerics;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Vector2 = System.Numerics.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
+/// <summary>
+/// Basic enemy: turns towards the player and follows at a steady cruise speed, keeping
+/// StopDistance away so it can shoot. When it is far behind (e.g. just spawned off-screen) it
+/// smoothly speeds up to farAwaySpeed instead of jumping. Rigidbody interpolation keeps the
+/// physics-step movement smooth on screen.
+/// </summary>
 public class Enemy1Movement : MonoBehaviour
 {
    public Transform Player;
    private Rigidbody rb;
-   private Vector3 movement;
 
-   [SerializeField] private float moveSpeed = 2f;
-   [SerializeField] private float StopDistance = 3f;
-   [SerializeField] private float farAwayDistance = 30f;
-   [SerializeField] private float farAwaySpeed = 100f;
-   
-  
+   [Tooltip("Normal follow speed.")]
+   [SerializeField] private float moveSpeed = 5.5f;
+   [Tooltip("Keeps this distance to the player (slows down smoothly before it).")]
+   [SerializeField] private float StopDistance = 7f;
+   [Tooltip("From this distance on it starts to speed up to catch up.")]
+   [SerializeField] private float farAwayDistance = 12f;
+   [Tooltip("Top speed when far away (reached 10 units beyond farAwayDistance).")]
+   [SerializeField] private float farAwaySpeed = 14f;
 
    private void Start()
    {
        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-       Player = playerObject.transform;
+       if (playerObject != null) Player = playerObject.transform;
        rb = GetComponent<Rigidbody>();
-       
-   }
-
-   private void Update()
-   {
-     
-       
-       Vector3 direction = Player.position - transform.position;
-       
-       direction.Normalize();
-       movement = direction;
-
-       float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-       Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-       
-       rb.MoveRotation(rotation);
-       PlayerToFarAway();
-       EnemyTooFarAway();
-      
+       rb.interpolation = RigidbodyInterpolation.Interpolate;
    }
 
    private void FixedUpdate()
    {
-       float distanceToPlayer = Vector3.Distance(transform.position, Player.transform.position);
+       if (Player == null) return;
 
-       if (distanceToPlayer <= StopDistance)
-       {
-           moveSpeed = 0;
-       }
-       else
-       {
-           if (distanceToPlayer > farAwayDistance)
-           {
-               moveSpeed = farAwaySpeed;
-           }
-           else
-           {
-               moveSpeed = 2;
-           }
+       Vector3 toPlayer = Player.position - rb.position;
+       toPlayer.z = 0f;
+       float distance = toPlayer.magnitude;
+       if (distance < 0.001f) return;
+       Vector3 direction = toPlayer / distance;
 
-           moveEnemy(movement);
-       }
-   }
+       // Face the player.
+       float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+       rb.MoveRotation(Quaternion.AngleAxis(angle, Vector3.forward));
 
-   private void moveEnemy(Vector3 direction)
-   {
+       // Cruise, ramp up smoothly when far away, ease out before the stop distance.
+       float catchUp = Mathf.InverseLerp(farAwayDistance, farAwayDistance + 10f, distance);
+       float speed = Mathf.Lerp(moveSpeed, farAwaySpeed, catchUp);
+       speed *= Mathf.Clamp01((distance - StopDistance) / 1.5f);
 
-       rb.MovePosition(transform.position + (moveSpeed * Time.deltaTime * direction));
-       
-   }
+       rb.MovePosition(rb.position + direction * (speed * Time.fixedDeltaTime));
 
-   private void PlayerToFarAway()
-   {
-       float DistanceToPlayer = Vector3.Distance(transform.position, Player.transform.position);
-       if (DistanceToPlayer > 15f)
-       {
-           moveSpeed = farAwaySpeed;
-       }
-       else
-       {
-           moveSpeed = 2;
-       }
-   }
-
-   private void EnemyTooFarAway()
-   {
-       float DistanceToPlayer = Vector3.Distance(transform.position, Player.transform.position);
-       if (DistanceToPlayer > 1000f)
-       {
-           Destroy(gameObject);
-       }
+       if (distance > 1000f) Destroy(gameObject);
    }
 }

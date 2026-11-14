@@ -185,7 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3c8fe8e2ebd8e64792cdacddf88e9b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemy2speed: 3.5
+  enemy2speed: 6.5
   distanceToExplode: 1
   explosionEnemy2: {fileID: 3344209261408045642, guid: 4431ff2c84e5a15458d901f0d9523d4f, type: 3}
   player: {fileID: 0}

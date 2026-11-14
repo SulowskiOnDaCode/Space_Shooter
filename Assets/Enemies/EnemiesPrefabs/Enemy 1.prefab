@@ -214,10 +214,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
-  moveSpeed: 3
+  moveSpeed: 5.5
   StopDistance: 7
-  farAwayDistance: 10
-  farAwaySpeed: 100
+  farAwayDistance: 12
+  farAwaySpeed: 14
 --- !u!114 &7569394532448267884
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -74,15 +74,9 @@ public class PowerUp : MonoBehaviour
 
     private Transform MakeQuad(string name, Material mat, float size, out Renderer r)
     {
-        var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        q.name = name;
-        Destroy(q.GetComponent<Collider>());
-        q.transform.SetParent(transform, false);
+        var q = QuadMesh.Create(name, transform, mat); // shared quad, no collider
         q.transform.localScale = Vector3.one * size;
         r = q.GetComponent<MeshRenderer>();
-        r.sharedMaterial = mat;
-        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        r.receiveShadows = false;
         return q.transform;
     }
 

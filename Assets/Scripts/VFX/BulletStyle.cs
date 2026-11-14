@@ -65,10 +65,7 @@ public class BulletStyle : MonoBehaviour
         s.pulseSeed = Random.value * 10f;
         s.baseSize = worldSize.x;
 
-        var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        q.name = "BulletGlow";
-        Destroy(q.GetComponent<Collider>());
-        q.transform.SetParent(bullet.transform, false);
+        var q = QuadMesh.Create("BulletGlow", bullet.transform, mat); // shared quad, no collider
 
         // Compensate for the bullet's own (possibly non-uniform) scale so the glow has a fixed world size.
         Vector3 ls = bullet.transform.lossyScale;

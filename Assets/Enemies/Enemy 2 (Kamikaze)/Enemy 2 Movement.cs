@@ -24,12 +24,17 @@ public class Enemy2Movement : MonoBehaviour
     private int currentHealth;
     
 
+    [Tooltip("When further away than this, the kamikaze speeds up to catch up.")]
+    [SerializeField] private float catchUpDistance = 14f;
+    [Tooltip("Top speed when far away (reached 10 units beyond catchUpDistance).")]
+    [SerializeField] private float catchUpSpeed = 15f;
+
     private void Start()
     {
         currentHealth = Health;
-        
+
         rb = this.GetComponent<Rigidbody>();
-      
+        rb.interpolation = RigidbodyInterpolation.Interpolate; // smooth on screen between physics steps
 
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
@@ -38,55 +43,32 @@ public class Enemy2Movement : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        Vector3 direction = player.position - transform.position;
-        
-        direction.Normalize();
-        movement = direction;
-
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-       
-        rb.MoveRotation(rotation);
-        PlayerToFarAway();
-        EnemyTooFarAway();
-
-
-    }
-
     private void FixedUpdate()
     {
-        if ((player.position - transform.position).magnitude <= distanceToExplode)
+        if (player == null) return;
+
+        Vector3 toPlayer = player.position - rb.position;
+        toPlayer.z = 0f;
+        float distance = toPlayer.magnitude;
+
+        if (distance <= distanceToExplode)
         {
             var transform1 = transform;
             Instantiate(explosionEnemy2, transform1.position, transform1.rotation);
             Destroy(gameObject);
+            return;
         }
-        else
-        {
-            moveEnemy(movement);
-        }
-    }
 
-    private void moveEnemy(Vector3 direction)
-    {
-        rb.MovePosition(transform.position + (enemy2speed * Time.deltaTime * direction));
-    }
+        movement = toPlayer / distance;
+        float angle = Mathf.Atan2(movement.y, movement.x) * Mathf.Rad2Deg;
+        rb.MoveRotation(Quaternion.AngleAxis(angle, Vector3.forward));
 
-    private void PlayerToFarAway()
-    {
-        float DistanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-        if (DistanceToPlayer> 15f)
-        {
-            enemy2speed = 100;
-        }
-        else
-        {
-            enemy2speed = 3;
-        }
-      
+        // Cruise speed close by, smoothly faster when far away (no more jumping at 100).
+        float catchUp = Mathf.InverseLerp(catchUpDistance, catchUpDistance + 10f, distance);
+        float speed = Mathf.Lerp(enemy2speed, catchUpSpeed, catchUp);
+        rb.MovePosition(rb.position + movement * (speed * Time.fixedDeltaTime));
+
+        if (distance > 1000f) Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other)

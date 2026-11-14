@@ -263,11 +263,13 @@ public class TwinStickMovement : MonoBehaviour
         {
             // Mouse Rotation
             
-            // Project the mouse onto the ship's plane. The depth must be the camera-to-ship distance:
-            // with z = 0 a perspective camera returns its own position, making the ship flip around.
-            float depth = Mathf.Abs(cam.transform.position.z - transform.position.z);
-            Vector3 mousePos = cam.ScreenToWorldPoint(new Vector3(aim.x, aim.y, depth));
-            Vector3 lookDir = mousePos - transform.position;
+            // Aim in screen space: compare the mouse with the ship's *on-screen* position, both from
+            // the same camera state. The camera follows with smoothing and updates after the ship,
+            // so mixing the old camera with the new ship position made the aim angle wobble every
+            // frame (visible jitter, worst when moving sideways to the aim direction).
+            Vector3 shipOnScreen = cam.WorldToScreenPoint(transform.position);
+            Vector2 lookDir = new Vector2(aim.x - shipOnScreen.x, aim.y - shipOnScreen.y);
+            if (lookDir.sqrMagnitude < 4f) return; // mouse right on the ship: keep the current heading
             float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
             
             transform.rotation = Quaternion.Euler(0, 0, angle);

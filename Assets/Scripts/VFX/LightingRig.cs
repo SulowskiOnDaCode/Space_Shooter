@@ -21,14 +21,14 @@ public class LightingRig : MonoBehaviour
 {
     [Header("Ambient (gamma colours)")]
     public Color ambientSky = new Color(0.22f, 0.26f, 0.32f);      // cool steel
-    public Color ambientEquator = new Color(0.24f, 0.26f, 0.31f);  // neutral cool (faces the camera)
+    public Color ambientEquator = new Color(0.30f, 0.32f, 0.37f);  // neutral cool (faces the camera)
     public Color ambientGround = new Color(0.07f, 0.08f, 0.10f);   // deep shadow
 
     [Header("Key light (game scene)")]
     public bool adjustKeyLight = true;
     public Vector3 keyDirection = new Vector3(0.45f, -0.5f, 0.75f);   // camera space, direction light travels
     public Color keyColor = new Color(0.95f, 0.97f, 1f);           // clean white
-    public float keyIntensity = 1.25f;
+    public float keyIntensity = 1.45f;
     [Range(0f, 1f)] public float keyShadowStrength = 0.7f;
     public bool keyShadows = true;
 
@@ -40,9 +40,11 @@ public class LightingRig : MonoBehaviour
     [Header("Rim light")]
     public Vector3 rimDirection = new Vector3(-0.2f, -0.55f, -0.8f);
     public Color rimColor = new Color(0.78f, 0.9f, 1f);            // icy white rim
-    public float rimIntensity = 0.9f;
+    public float rimIntensity = 1.5f;
     [Tooltip("Pixel lights give crisp fill/rim (used for the menu preview); vertex lights are cheaper (game).")]
-    public bool pixelFillAndRim = false;
+    public bool pixelFill = false;
+    [Tooltip("A pixel rim gives every ship a crisp bright edge against the dark background.")]
+    public bool pixelRim = true;
 
     [Header("Reflections")]
     public bool reflectionProbe = true;
@@ -50,7 +52,7 @@ public class LightingRig : MonoBehaviour
     public bool useSpaceSkybox = true;
     public float reflectionIntensity = 1f;
 
-    private Light fill, rim;
+    private Light fill, rim, keyLight;
     private ReflectionProbe probe;
 
     // ------------------------------------------------------------------ auto setup
@@ -75,6 +77,7 @@ public class LightingRig : MonoBehaviour
         if (isMenu) rig.UseMenuPreset();
         rig.useSpaceSkybox = isGame; // the menu keeps its own visible skybox
         rig.Apply();
+        Debug.Log($"LightingRig applied to scene '{scene.name}' (key light: {(rig.keyLight != null ? rig.keyLight.name : "none")})");
     }
 
     /// <summary>
@@ -83,25 +86,25 @@ public class LightingRig : MonoBehaviour
     /// </summary>
     public void UseMenuPreset()
     {
-        ambientSky = new Color(0.17f, 0.19f, 0.23f);
-        ambientEquator = new Color(0.26f, 0.27f, 0.30f);
+        ambientSky = new Color(0.22f, 0.24f, 0.29f);
+        ambientEquator = new Color(0.34f, 0.35f, 0.39f);
         ambientGround = new Color(0.10f, 0.10f, 0.11f);
 
         adjustKeyLight = true;                          // replace the old teal "Sun" angle
         keyDirection = new Vector3(0.5f, -0.55f, 0.65f); // moonlight from the upper left
         keyColor = new Color(0.86f, 0.91f, 1f);
-        keyIntensity = 1.15f;
+        keyIntensity = 1.5f;
         keyShadows = false;
 
         fillDirection = new Vector3(-0.65f, 0.25f, 0.7f);
         fillColor = new Color(0.38f, 0.46f, 0.62f);
-        fillIntensity = 0.45f;
+        fillIntensity = 0.6f;
 
         rimDirection = new Vector3(-0.35f, -0.45f, -0.82f);
         rimColor = new Color(0.8f, 0.88f, 1f);
-        rimIntensity = 1.1f;
+        rimIntensity = 1.6f;
 
-        pixelFillAndRim = true;  // only the preview ship is lit here, so crisp lights are cheap
+        pixelFill = true;        // only the preview ship is lit here, so crisp lights are cheap
         useSpaceSkybox = false;  // reflect the menu's own night sky
     }
 
@@ -123,6 +126,7 @@ public class LightingRig : MonoBehaviour
         if (adjustKeyLight)
         {
             Light key = FindKeyLight();
+            keyLight = key;
             if (key != null)
             {
                 key.transform.rotation = Aim(view, keyDirection);
@@ -135,8 +139,8 @@ public class LightingRig : MonoBehaviour
         }
 
         // Fill + rim
-        fill = MakeLight("Fill Light", view, fillDirection, fillColor, fillIntensity);
-        rim = MakeLight("Rim Light", view, rimDirection, rimColor, rimIntensity);
+        fill = MakeLight("Fill Light", view, fillDirection, fillColor, fillIntensity, pixelFill);
+        rim = MakeLight("Rim Light", view, rimDirection, rimColor, rimIntensity, pixelRim);
 
         // Reflections
         RenderSettings.reflectionIntensity = reflectionIntensity;
@@ -167,7 +171,7 @@ public class LightingRig : MonoBehaviour
         return best;
     }
 
-    private Light MakeLight(string name, Transform view, Vector3 dir, Color color, float intensity)
+    private Light MakeLight(string name, Transform view, Vector3 dir, Color color, float intensity, bool pixel)
     {
         var go = new GameObject(name);
         go.transform.SetParent(transform, false);
@@ -175,7 +179,7 @@ public class LightingRig : MonoBehaviour
         l.type = LightType.Directional;
         l.shadows = LightShadows.None;
         // Vertex lights are folded into SH (no extra draw passes); pixel lights are crisper.
-        l.renderMode = pixelFillAndRim ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
+        l.renderMode = pixel ? LightRenderMode.ForcePixel : LightRenderMode.ForceVertex;
         Configure(l, view, dir, color, intensity);
         return l;
     }

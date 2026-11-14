@@ -59,6 +59,10 @@ public class Spawner : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         cam = Camera.main;
+        // Enemies placed directly in the scene get the glow outline too.
+        foreach (var e in FindObjectsByType<Enemy1DamageSystem>()) EnemyGlow.Apply(e.gameObject);
+        foreach (var e in FindObjectsByType<Enemy2Movement>()) EnemyGlow.Apply(e.gameObject);
+        foreach (var e in FindObjectsByType<Enemy3>()) EnemyGlow.Apply(e.gameObject);
         StartCoroutine(SpawnWaves());
         StartCoroutine(AsteroidField());
     }
@@ -130,7 +134,8 @@ public class Spawner : MonoBehaviour
     private void SpawnShip(GameObject prefab)
     {
         if (prefab == null) return;
-        Instantiate(prefab, OffscreenPoint(), Quaternion.identity);
+        GameObject ship = Instantiate(prefab, OffscreenPoint(), Quaternion.identity);
+        EnemyGlow.Apply(ship); // subtle coral outline so ships read against the dark background
     }
 
     /// <summary>A random point just outside the camera view, centred on the player.</summary>

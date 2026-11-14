@@ -214,8 +214,11 @@ public class TwinStickMovement : MonoBehaviour
 
         if (doesAbility) return;
         HandleInput();
-        HandleMovement();
+        // Rotate BEFORE moving: the follow camera only catches up in LateUpdate, so right now it
+        // still matches last frame's ship position. Aiming from the moved ship against the old
+        // camera made the angle wobble every frame (jitter when moving sideways to the aim).
         HandleRotation();
+        HandleMovement();
         HandleShooting();
         HandleAbility();
     }

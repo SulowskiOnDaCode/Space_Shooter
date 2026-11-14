@@ -91,7 +91,9 @@ public class SpaceBackground : MonoBehaviour
 
         material.SetVector(OffsetId, offset);
         material.SetFloat(AspectId, cam.aspect);
-        material.SetFloat(ScaleId, height);
+        // Stars/grid are sized in gameplay-plane units (not at the far quad), so they look the same
+        // with an orthographic or a perspective camera.
+        material.SetFloat(ScaleId, 2f * CameraView.HalfHeight(cam));
     }
 
     private void OnDestroy()

@@ -74,7 +74,7 @@ public class Enemy3 : MonoBehaviour
 
    private void GetRandomPoints()
    {
-      float cameraHeight = Camera.main.orthographicSize;
+      float cameraHeight = CameraView.HalfHeight(Camera.main); // works for ortho and perspective
       float cameraWidth = Camera.main.aspect * cameraHeight;
 
       float randomX = Random.Range(-cameraWidth, cameraWidth);

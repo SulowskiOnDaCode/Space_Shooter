@@ -28,7 +28,7 @@ public class Enemy : MonoBehaviour
         speed = Random.Range(minSpeed, maxSpeed);
 
         // Position
-        var position = Camera.main.ViewportToWorldPoint(new Vector3(Random.Range(0f, 1f), 1, 0));
+        var position = CameraView.ViewportToPlane(Camera.main, Random.Range(0f, 1f), 1f); // top edge of the view
         position.y += 2;
         position.z = 0;
         transform.position = position;
@@ -67,8 +67,8 @@ public class Enemy : MonoBehaviour
 
         // Remove once it has drifted well below the view, so the spawner can send new ones in.
         Camera cam = Camera.main;
-        if (cam != null && cam.orthographic &&
-            transform.position.y < cam.transform.position.y - cam.orthographicSize - scale - 2f)
+        if (cam != null &&
+            transform.position.y < cam.transform.position.y - CameraView.HalfHeight(cam) - scale - 2f)
         {
             Destroy(gameObject);
         }

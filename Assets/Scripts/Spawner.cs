@@ -142,7 +142,7 @@ public class Spawner : MonoBehaviour
     private Vector3 OffscreenPoint()
     {
         Vector3 centre = player != null ? player.transform.position : transform.position;
-        float halfH = cam != null && cam.orthographic ? cam.orthographicSize : 7f;
+        float halfH = CameraView.HalfHeight(cam);
         float halfW = halfH * (cam != null ? cam.aspect : 16f / 9f);
         float radius = Mathf.Sqrt(halfW * halfW + halfH * halfH) + 1.5f;
 
